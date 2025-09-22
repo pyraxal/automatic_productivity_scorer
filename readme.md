@@ -90,4 +90,5 @@ You can also call the analysis pipeline from Python:
 
 - Currently focused on English transcripts
 - Scoring metrics and technical definitions are a work in progress with SLP collaboration.
-- Future updates will integrate api access + restructure of csv
+- Future updates will integrate api access + restructure of cs
+- Better comments and documentation (speed release/prototype for testing, finalization later)
