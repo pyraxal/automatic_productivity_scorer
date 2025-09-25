@@ -29,8 +29,8 @@ A program that automates extraction, cleaning, analysis, and scoring of sentence
 
 Create a virtual enviroment of your choice (conda/venv), then clone repository:
 
-    git clone https://github.com/pyraxal/automatic_productivity_score
-    cd automatic_productivity_score
+    git clone https://github.com/pyraxal/automatic_productivity_scorer
+    cd automatic_productivity_scorer
     pip install -r requirements.txt
 
 Stanza models are automatically downloaded when first running analysis.
@@ -49,7 +49,6 @@ Drop your `.cha` or `.txt` transcript files in the `input/` folder next to `main
 - Processed CSVs are saved in `output/`
 - Original files are moved to `done/`
 - You can also specify a single file or folder:
-
     python main.py -p input/myfile.cha
     python main.py -p input_folder/
 
