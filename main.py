@@ -5,7 +5,7 @@ import shutil
 from interface import run_full_pipeline
 
 def main():
-    parser = argparse.ArgumentParser(description="Process ENNI transcripts")
+    parser = argparse.ArgumentParser(description="Process CHA or Text transcripts")
     parser.add_argument(
         "-p", "--path",
         default=None,
@@ -59,7 +59,7 @@ def main():
 
         print(f"Processing {file_path} → {output_csv}")
         run_full_pipeline(text, output_csv)
-        print(f"✅ CSV written: {output_csv}")
+        print(f"CSV written: {output_csv}")
 
         # move processed file into done folder outside input
         dest_path = os.path.join(done_dir, os.path.basename(file_path))
