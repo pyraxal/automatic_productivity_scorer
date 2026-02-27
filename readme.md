@@ -51,7 +51,9 @@ Drop your `.cha` or `.txt` transcript files in the `input/` folder next to `main
 - You can also specify a single file or folder:
     python main.py -p input/myfile.cha
     python main.py -p input_folder/
-
+- You can also specify weather to specifically screen for [+rr] lines:
+    python main.py -p input/myfile.cha -rr
+    
 ### Python Interactive Interface
 
 You can also call the analysis pipeline from Python:

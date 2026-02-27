@@ -4,8 +4,11 @@ from score import write_analysis_to_csv
 
 #skeleton for API in the future
 
-def run_full_pipeline(text, output_csv_path=None):
-    rr_text = extract_rr_lines(text)
+def run_full_pipeline(text, output_csv_path=None, extract_rr = False):
+    if extract_rr:
+        rr_text = extract_rr_lines(text)
+    else:
+        rr_text = text
     utterances = rr_text.strip().split("\n")
     results = analyze_utterances(utterances)
     if output_csv_path:

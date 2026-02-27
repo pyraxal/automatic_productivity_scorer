@@ -16,6 +16,12 @@ def main():
         default=None,
         help="Output directory for CSV results (default: ./output/)"
     )
+    parser.add_argument(
+        "-rr", "--extract-rr",
+        default=False,
+        action="store_true",
+        help="Extract only RR lines for analysis"
+    )
     args = parser.parse_args()
 
     # base directory is where the script is
@@ -58,7 +64,7 @@ def main():
         output_csv = os.path.join(output_dir, base_name + "_results.csv")
 
         print(f"Processing {file_path} → {output_csv}")
-        run_full_pipeline(text, output_csv)
+        run_full_pipeline(text, output_csv, extract_rr=args.extract_rr)
         print(f"CSV written: {output_csv}")
 
         # move processed file into done folder outside input

@@ -36,15 +36,13 @@ def extract_rr_lines(text):
 
 
 def clean_for_scoring(text):
-    # keep exactly as original script for cleaning
     text = re.sub(r"\bisp@x\b", "NADS", text, flags=re.IGNORECASE)
     text = re.sub(r"\b0aux\b", "", text, flags=re.IGNORECASE)
     text = re.sub(r"&\+t", "", text, flags=re.IGNORECASE)
     text = re.sub(r"&\+s", "", text, flags=re.IGNORECASE)
     text = re.sub(r"\b0p\b", "", text, flags=re.IGNORECASE)
     text = re.sub(r"\[\+\s*rr\]", "", text, flags=re.IGNORECASE)
-    text = text.replace("’", "'")
-
+    text = text.replace("'", "'")
     text = re.sub(r"(\w)[\$@]\w+", r"\1", text)
     text = re.sub(r"<[^>]*>", "", text)
 
@@ -57,11 +55,40 @@ def clean_for_scoring(text):
 
     text = re.sub(r"\[[^\]]*\]", "", text)
     text = re.sub(r"\([^)]*\)", "", text)
-    text = re.sub(r"\b([A-Za-z]+)'s\s+([a-zA-Z]+ing)\b", r"\1 is \2", text)
-    text = re.sub(r"\bit is\b", "its", text, flags=re.IGNORECASE)
     text = re.sub(r"[^\w\s\.\?!']", "", text)
     text = re.sub(r"\s+", " ", text).strip()
 
     for original, replacement in replacements.items():
         text = re.sub(rf"\b{re.escape(original)}\b", replacement, text)
+    
+    text = re.sub(r'\..*$', '.', text)
+    text = text.rstrip('.')
+    
+    # Advanced: Expand contractions
+    text = re.sub(r"\b([A-Za-z]+)'s\s+([a-zA-Z]+ing)\b", r"\1 is \2", text)
+    text = re.sub(r"\bit is\b", "its", text, flags=re.IGNORECASE)
+
+    # Remove all uh/um variants
+    text = re.sub(r'\b(uh+|um+)\b[\s,.]*', '', text, flags=re.IGNORECASE).strip()
+
+    # Strip leading coordinator but preserve any article that immediately
+    # follows it. Without this, "and [/] the door is closing" would clean to
+    # "door is closing" (losing "the") because [/] is stripped first and then
+    # the coordinator regex eats "and the " as a unit.
+    # Pass 1: coordinator + article → keep just the article
+    text = re.sub(
+        r"^\s*(and\s+then?|but\s+then?|then|and|but)\s+(a|an|the)\s+",
+        r"\2 ",
+        text, flags=re.IGNORECASE
+    )
+    # Pass 2: plain coordinator with no following article → strip normally
+    text = re.sub(
+        r"^\s*(and\s+then?|but\s+then?|then|and|but)\s+",
+        "", text, flags=re.IGNORECASE
+    ).strip()
+    
+    chi_match = re.compile(r'^CHI\s*(.*)').match(text)
+    if chi_match:
+        text = chi_match.group(1).strip()
+        
     return text
