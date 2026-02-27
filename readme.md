@@ -18,7 +18,7 @@ A program that automates extraction, cleaning, analysis, and scoring of sentence
 # 🧾 Prerequisites
 
 - Python 3.10+
-- stanza NLP library (`pip install stanza`)
+- Everything in requirements.txt
 - ffmpeg if processing audio transcripts in future
 - Optional: GPU for faster NLP processing 
 
