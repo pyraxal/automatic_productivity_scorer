@@ -54,7 +54,6 @@ def analyze_utterances(utterances, require_rr_code=False,
             continue
 
         raw = utt.strip()
-        print(raw)
         enni_clean = clean_for_scoring(raw)
         if not enni_clean:
             continue
@@ -462,3 +461,33 @@ def analyze_utterances(utterances, require_rr_code=False,
         })
 
     return per_utt_results
+
+def is_ads_result(result):
+    cleaned = result.get("cleaned", "").lower()
+
+    if "ads" in cleaned:
+        return True
+
+    productive_fields = [
+        "art_productive",
+        "aux_productive",
+        "active_prog_productive"
+    ]
+
+    return any(result.get(f, 0) == 1 for f in productive_fields)
+
+
+def analyze_ads_only(utterances,
+                     require_rr_code=False,
+                     verb_master_list_path="verb_master_list_present.txt"):
+
+    results = analyze_utterances(
+        utterances,
+        require_rr_code=require_rr_code,
+        verb_master_list_path=verb_master_list_path
+    )
+
+    for r in results:
+        r["is_ads"] = is_ads_result(r)
+
+    return results

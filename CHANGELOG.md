@@ -118,5 +118,71 @@ false-positive article credits on bare noun phrases like "a dog" or "the cat in 
 ## 8. Regex Cleaning Fix (FIX)
 Fixed edge cases where 's + -ing would strip much more of the sentence than necessary, removing the necessary context to score a sentence. In addition, added removal for common stop word utterances (uh/um/uhm/etc)
 
+---
+
 ## 9. [rr+] Filter Fix (FIX)
 Actually gave you the option to add a -rr to the arguments to allow for the user to filter out any sentences without an rr tag. Default is false. 
+
+---
+
+# Changelog: 1.1
+
+## 1. Added ADS-Only Mode (NEW)
+- Introduced `-ads` CLI flag to run Active Declarative Sentence scoring independently.
+- ADS mode outputs a simplified CSV format:
+  - `Utterance, ADS`
+  - Each line receives a binary score (1 = ADS, 0 = not ADS).
+- ADS classification rules:
+  - Any utterance explicitly tagged with `ADS` is automatically scored as 1.
+  - Any utterance with productivity = 1 (Article, Auxiliary, Active Progressive, or General Progressive) qualifies as ADS.
+
+---
+
+## 2. ADS-Compatible Compact Support (NEW)
+- Compact now detects ADS-format CSVs automatically.
+- ADS compact output format:
+  - `Name`
+  - `Total ADS`
+  - `Total Utterances`
+  - `ADS Ratio`
+- Directory compact mode supports mixing productivity and ADS result files.
+- Original productivity compact behavior preserved without modification.
+
+---
+
+## 3. RR Mode Integration in ADS (NEW)
+- `--ads-only` fully supports `--extract-rr`.
+- ADS scoring can now operate exclusively on RR-tagged lines.
+- Behavior mirrors full productivity pipeline logic.
+
+---
+
+## 4. Refactored Compact Detection Logic (IMPROVED)
+- Replaced fragile column-based detection with structural detection:
+  - ADS files identified by `Utterance,ADS` header.
+- Restored original vertical-section productivity parsing.
+- Prevented data loss introduced by earlier format changes.
+
+---
+
+## 5. Added Dedicated ADS CSV Writer (NEW)
+- Implemented `write_ads_csv()` to isolate ADS output formatting.
+- Prevented ADS mode from writing productivity-style sectioned output.
+
+---
+
+## 6. Added analyze_ads_only Entry Point (NEW)
+- New wrapper around `analyze_utterances()`.
+- Adds `is_ads` boolean per utterance.
+- Maintains compatibility with existing analyzer logic.
+
+---
+
+## 7. Maintained Backward Compatibility (STABLE)
+- No breaking changes to:
+  - `analyze_utterances()`
+  - `write_analysis_to_csv()`
+  - Productivity compact behavior
+- Existing workflows function unchanged.
+
+---

@@ -1,15 +1,12 @@
-#Compact takes a directory of processed transcripts and converts them into a singular csv file
-#Compact also can take a singular .csv file and convert it into a compact csv file
-#The csv/txt is structured like so:
-#Name, Total Article Productivity, Total Auxiliary Productivity, Total Active Progressive Productivity, Total General Progressive Productivity
-#...,...,...,...,...
+# Compact takes a directory of processed transcripts and converts them into a singular csv file
+# Compact also can take a singular .csv file and convert it into a compact csv file
 
 import os
 import sys
 import pandas as pd
 
 
-def parse_column(csv_path):
+def parse_productivity_column(csv_path):
 
     df = pd.read_csv(csv_path, header=None, names=["value"])
     data = df["value"].fillna("").astype(str).tolist()
@@ -44,7 +41,6 @@ def parse_column(csv_path):
         except:
             pass
 
-    # Drop the last printed total
     for h in headers:
         if len(sections[h]) > 0:
             sections[h] = sections[h][:-1]
@@ -57,12 +53,40 @@ def parse_column(csv_path):
     }
 
 
+def is_ads_csv(csv_path):
+    try:
+        with open(csv_path, "r", encoding="utf-8") as f:
+            first_line = f.readline().strip()
+        return first_line.lower().startswith("utterance,ads")
+    except:
+        return False
+
+
+def parse_ads_column(csv_path):
+
+    df = pd.read_csv(csv_path)
+
+    if "ADS" not in df.columns:
+        return None
+
+    total_utts = len(df)
+    total_ads = int(df["ADS"].sum())
+    ratio = total_ads / total_utts if total_utts > 0 else 0
+
+    return {
+        "Total ADS": total_ads,
+        "Total Utterances": total_utts,
+        "ADS Ratio": round(ratio, 4)
+    }
+
 def compact_single(csv_path):
 
-    # base name of input file
     base = os.path.splitext(os.path.basename(csv_path))[0]
 
-    totals = parse_column(csv_path)
+    if is_ads_csv(csv_path):
+        totals = parse_ads_column(csv_path)
+    else:
+        totals = parse_productivity_column(csv_path)
 
     out_df = pd.DataFrame([{
         "Name": base,
@@ -81,11 +105,16 @@ def compact_directory(dir_path):
     rows = []
 
     for fname in os.listdir(dir_path):
-        if not fname.lower().endswith(".csv") and not fname.lower().endswith(".txt"):
+
+        if not fname.lower().endswith((".csv", ".txt")):
             continue
 
         fpath = os.path.join(dir_path, fname)
-        totals = parse_column(fpath)
+
+        if is_ads_csv(fpath):
+            totals = parse_ads_column(fpath)
+        else:
+            totals = parse_productivity_column(fpath)
 
         rows.append({
             "Name": os.path.splitext(fname)[0],
@@ -104,6 +133,7 @@ def compact_directory(dir_path):
 
 
 if __name__ == "__main__":
+
     if len(sys.argv) < 2:
         print("Usage:")
         print("  python compact.py file.csv")

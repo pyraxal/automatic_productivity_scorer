@@ -1,4 +1,5 @@
 import csv
+import pandas as pd
 
 def write_analysis_to_csv(per_utt_results, output_csv_path):
     with open(output_csv_path, "w", newline="", encoding="utf-8") as fout:
@@ -82,3 +83,15 @@ def write_analysis_to_csv(per_utt_results, output_csv_path):
             ])
             total_gp += r["prog_productive"]
         w.writerow(["", "", "", "", "Total General Progressive Productivity", str(total_gp)])
+
+def write_ads_csv(results, output_csv_path):
+    rows = []
+
+    for r in results:
+        rows.append({
+            "Utterance": r.get("utterance", ""),
+            "ADS": 1 if r.get("is_ads", False) else 0
+        })
+
+    df = pd.DataFrame(rows)
+    df.to_csv(output_csv_path, index=False)

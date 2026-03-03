@@ -2,7 +2,8 @@ import argparse
 import os
 import glob
 import shutil
-from interface import run_full_pipeline
+from interface import run_full_pipeline, run_ads_only_pipeline
+
 
 def main():
     parser = argparse.ArgumentParser(description="Process CHA or Text transcripts")
@@ -22,23 +23,27 @@ def main():
         action="store_true",
         help="Extract only RR lines for analysis"
     )
+    parser.add_argument(
+        "-ads", "--ads-only",
+        default=False,
+        action="store_true",
+        help="Run ADS-only analysis (active declarative sentences only)"
+    )
     args = parser.parse_args()
 
-    # base directory is where the script is
     base_dir = os.path.dirname(os.path.abspath(__file__))
 
-    # default input folder
     input_dir = args.path or os.path.join(base_dir, "input")
     if not os.path.exists(input_dir):
         os.makedirs(input_dir)
         print(f"Created input folder: {input_dir}")
 
-    # determine files to process
     if os.path.isfile(input_dir):
         files = [input_dir]
         base_input_dir = os.path.dirname(input_dir)
     elif os.path.isdir(input_dir):
-        files = glob.glob(os.path.join(input_dir, "*.cha")) + glob.glob(os.path.join(input_dir, "*.txt"))
+        files = glob.glob(os.path.join(input_dir, "*.cha")) + \
+                glob.glob(os.path.join(input_dir, "*.txt"))
         base_input_dir = input_dir
     else:
         print(f"Error: {input_dir} is not a valid file or directory.")
@@ -48,11 +53,9 @@ def main():
         print(f"No .cha or .txt files found in {input_dir}")
         return
 
-    # default output folder
     output_dir = args.output or os.path.join(base_dir, "output")
     os.makedirs(output_dir, exist_ok=True)
 
-    # processed folder outside input, at same level as input/output
     done_dir = os.path.join(base_dir, "processed")
     os.makedirs(done_dir, exist_ok=True)
 
@@ -64,10 +67,22 @@ def main():
         output_csv = os.path.join(output_dir, base_name + "_results.csv")
 
         print(f"Processing {file_path} → {output_csv}")
-        run_full_pipeline(text, output_csv, extract_rr=args.extract_rr)
+
+        if args.ads_only:
+            run_ads_only_pipeline(
+                text,
+                output_csv_path=output_csv,
+                extract_rr=args.extract_rr
+            )
+        else:
+            run_full_pipeline(
+                text,
+                output_csv_path=output_csv,
+                extract_rr=args.extract_rr
+            )
+
         print(f"CSV written: {output_csv}")
 
-        # move processed file into done folder outside input
         dest_path = os.path.join(done_dir, os.path.basename(file_path))
         shutil.move(file_path, dest_path)
         print(f"Moved processed file to: {dest_path}")
